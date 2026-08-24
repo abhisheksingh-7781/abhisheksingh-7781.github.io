@@ -1,0 +1,214 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: #08090b;
+    --accent-rgb: 53 199 154;
+    --data-rgb: 224 164 88;
+    --nav-h: 4.5rem;
+  }
+
+  * {
+    border-color: theme('colors.line.DEFAULT');
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    /* Offset anchor jumps so headings clear the sticky navigation. */
+    scroll-padding-top: 6rem;
+  }
+
+  /* Lenis drives scrolling itself; native smooth scroll would fight it. */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  html.lenis {
+    scroll-behavior: auto;
+  }
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
+  body {
+    @apply bg-ink-950 text-chalk antialiased;
+    font-feature-settings: 'ss01' 1, 'cv02' 1, 'cv11' 1;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background: rgb(var(--accent-rgb) / 0.25);
+    color: #fff;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent/70 ring-offset-2 ring-offset-ink-950 rounded-sm;
+  }
+
+  /* Hide focus rings for pointer users, keep them for keyboard users. */
+  :focus:not(:focus-visible) {
+    @apply outline-none;
+  }
+
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #08090b;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #23272f;
+    border-radius: 999px;
+    border: 3px solid #08090b;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #333944;
+  }
+}
+
+@layer components {
+  /* --- Layout primitives --------------------------------------------- */
+  .shell {
+    @apply mx-auto w-full max-w-[1240px] px-5 sm:px-8 lg:px-12;
+  }
+
+  .section-y {
+    @apply py-section-sm md:py-section lg:py-section-lg;
+  }
+
+  .hairline {
+    @apply border-t border-line;
+  }
+
+  /* --- Surfaces -------------------------------------------------------- */
+  .surface {
+    @apply rounded-2xl border border-line bg-ink-850/70 backdrop-blur-[2px];
+  }
+
+  .surface-hover {
+    @apply transition-[border-color,background-color,transform,box-shadow] duration-500 ease-smooth
+           hover:border-line-strong hover:bg-ink-800/70;
+  }
+
+  /* --- Type helpers ---------------------------------------------------- */
+  .eyebrow {
+    @apply font-mono text-eyebrow uppercase tracking-[0.22em] text-chalk-faint;
+  }
+
+  .lead {
+    @apply text-base leading-relaxed text-chalk-muted sm:text-lg;
+  }
+
+  .serif-accent {
+    @apply font-display italic font-normal;
+  }
+
+  /* --- Decoration ------------------------------------------------------ */
+  .grid-bg {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+
+  .dot-bg {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  .mask-fade-y {
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+  }
+
+  .mask-fade-x {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  }
+
+  /* Thin animated top-border used on hovered cards. */
+  .edge-light {
+    @apply pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-500;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(var(--accent-rgb) / 0.55),
+      transparent
+    );
+  }
+  .group:hover .edge-light,
+  .group:focus-within .edge-light {
+    @apply opacity-100;
+  }
+
+  /* Placeholder frame for content the owner has not supplied yet. */
+  .placeholder-frame {
+    @apply relative overflow-hidden rounded-xl border border-dashed border-line-strong bg-ink-900;
+  }
+
+  .placeholder-label {
+    @apply font-mono text-[0.6875rem] uppercase tracking-[0.18em] text-chalk-faint;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .gpu {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .link-underline {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .link-underline:hover,
+  .link-underline:focus-visible {
+    background-size: 100% 1px;
+  }
+}
+
+/* Accessibility: strip decorative motion when the OS asks for it. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
