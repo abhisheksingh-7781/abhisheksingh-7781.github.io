@@ -60,6 +60,14 @@ const schema = z.object({
   CONTACT_FROM_EMAIL: z.string().email().optional(),
 
   /**
+   * Injected by the host platform, not by us. Reported on /api/health so a
+   * deployment can be confirmed from outside — otherwise there is no way to
+   * tell whether the code now serving is the code just pushed.
+   */
+  VERCEL_GIT_COMMIT_SHA: z.string().optional(),
+  RENDER_GIT_COMMIT: z.string().optional(),
+
+  /**
    * Shared secret guarding the read-only admin endpoints. Omit it and those
    * routes stay disabled entirely, rather than being served unprotected.
    */
@@ -97,6 +105,7 @@ export const env = {
   mailerConfigured,
   storageConfigured: Boolean(raw.MONGODB_URI),
   adminEnabled: Boolean(raw.ADMIN_API_KEY),
+  commit: (raw.VERCEL_GIT_COMMIT_SHA ?? raw.RENDER_GIT_COMMIT ?? 'unknown').slice(0, 7),
   /**
    * The route layer checks this: with no mailer and no database there is
    * nowhere for a message to go, and the API says so instead of accepting it.

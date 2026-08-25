@@ -16,6 +16,7 @@ healthRouter.get('/health', (_req, res) => {
     status: 'healthy',
     uptimeSeconds: Math.round(process.uptime()),
     environment: env.NODE_ENV,
+    build: env.commit,
     services: {
       database: env.storageConfigured ? (isDatabaseConnected() ? 'connected' : 'unavailable') : 'disabled',
       email: env.mailerConfigured ? 'configured' : 'disabled',
