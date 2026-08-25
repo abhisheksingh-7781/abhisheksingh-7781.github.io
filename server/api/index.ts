@@ -17,11 +17,11 @@ import { ensureDatabase } from '../src/services/database.js';
 const app = createApp();
 
 /**
- * Vercel routes every path to this function via the rewrite in vercel.json.
- * Whether the platform hands us the original path or the rewrite destination
- * has changed across Vercel's routing versions, so rather than depend on it,
- * anything that does not already address the API is prefixed with /api — the
- * mount point the Express app expects.
+ * vercel.json sends every path to this function. Whether the platform hands us
+ * the original path or the route destination has varied across Vercel's
+ * routing versions, so rather than depend on it, anything that does not
+ * already address the API is prefixed with /api — the mount point the Express
+ * app expects.
  */
 function normalisePath(req: IncomingMessage) {
   const url = req.url ?? '/';

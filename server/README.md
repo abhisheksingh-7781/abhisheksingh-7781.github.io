@@ -112,7 +112,12 @@ Two shapes are supported, and the same `src/` serves both.
 [api/index.ts](api/index.ts) is the entry: Vercel calls a handler per request
 rather than running `src/index.ts`, so there is no `app.listen()`. The Express
 app is built once at module scope and reused by warm invocations, and
-[vercel.json](vercel.json) rewrites every path to it.
+[vercel.json](vercel.json) routes every path to it.
+
+That config names the function explicitly rather than relying on zero-config
+detection. This matters: with a framework preset guessed from the repository
+root, or with no output directory to find, a zero-config build of an API-only
+project fails before it ever reaches the function.
 
 Set the **Root Directory** to `server` in the project settings, then add the
 environment variables from [.env.example](.env.example) in the dashboard.
