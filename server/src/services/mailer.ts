@@ -3,6 +3,7 @@ import nodemailer, { type Transporter } from 'nodemailer';
 import { env } from '../config/env.js';
 import { logger } from '../lib/logger.js';
 import type { ContactInput } from '../validation/contact.js';
+import { renderContactEmail } from './email-template.js';
 
 /**
  * Email delivery over SMTP. Optional: without full credentials the transport
@@ -44,15 +45,6 @@ export async function verifyMailer(): Promise<void> {
   }
 }
 
-/** Escapes text before it goes into the HTML body of the notification. */
-function escapeHtml(value: string) {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
 export type DeliveryResult = { sent: boolean; error?: string };
 
 /**
@@ -66,27 +58,16 @@ export async function sendContactNotification(input: ContactInput): Promise<Deli
   if (!transport) return { sent: false, error: 'SMTP is not configured.' };
 
   const from = env.CONTACT_FROM_EMAIL ?? env.SMTP_USER!;
+  const { subject, text, html } = renderContactEmail(input, new Date());
 
   try {
     await transport.sendMail({
       from: { name: 'Portfolio contact form', address: from },
       to: env.CONTACT_TO_EMAIL!,
       replyTo: { name: input.name, address: input.email },
-      subject: `Portfolio enquiry from ${input.name}`,
-      text: [
-        `Name:    ${input.name}`,
-        `Email:   ${input.email}`,
-        '',
-        input.message,
-      ].join('\n'),
-      html: [
-        '<div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.6">',
-        `<p><strong>Name:</strong> ${escapeHtml(input.name)}<br>`,
-        `<strong>Email:</strong> <a href="mailto:${escapeHtml(input.email)}">${escapeHtml(input.email)}</a></p>`,
-        '<hr style="border:none;border-top:1px solid #ddd">',
-        `<p style="white-space:pre-wrap">${escapeHtml(input.message)}</p>`,
-        '</div>',
-      ].join(''),
+      subject,
+      text,
+      html,
     });
 
     return { sent: true };
