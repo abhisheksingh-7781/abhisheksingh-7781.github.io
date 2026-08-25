@@ -25,7 +25,7 @@ export function Contact() {
       {/* Closing glow — the visual bookend to the hero. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-[-30%] h-[560px] bg-[radial-gradient(50%_60%_at_50%_100%,rgba(53,199,154,0.09),transparent)]"
+        className="pointer-events-none absolute inset-x-0 bottom-[-30%] h-[560px] bg-[radial-gradient(50%_60%_at_50%_100%,rgb(var(--accent)/0.09),transparent)]"
       />
       <div
         aria-hidden

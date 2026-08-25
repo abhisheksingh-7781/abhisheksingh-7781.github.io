@@ -129,7 +129,7 @@ function Connectors() {
         <motion.path
           d="M500 0 C500 55, 210 40, 210 100"
           fill="none"
-          stroke="rgba(53,199,154,0.45)"
+          stroke="rgb(var(--accent)/0.45)"
           strokeWidth="1"
           initial={{ pathLength: 0, opacity: 0 }}
           whileInView={{ pathLength: 1, opacity: 1 }}
@@ -186,7 +186,7 @@ export function Duality() {
           <div className="relative">
             <span
               aria-hidden
-              className="absolute inset-0 -z-10 rounded-2xl bg-[radial-gradient(closest-side,rgba(53,199,154,0.16),transparent)] blur-xl"
+              className="absolute inset-0 -z-10 rounded-2xl bg-[radial-gradient(closest-side,rgb(var(--accent)/0.16),transparent)] blur-xl"
             />
             <div className="surface flex items-center gap-4 px-6 py-4">
               <span className="relative flex h-2.5 w-2.5">

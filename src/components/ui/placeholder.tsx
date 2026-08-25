@@ -74,7 +74,7 @@ export function PlaceholderMedia({
         className={cn(
           'absolute inset-0 opacity-[0.5]',
           tone === 'build'
-            ? 'bg-[radial-gradient(60%_60%_at_50%_40%,rgba(53,199,154,0.09),transparent_70%)]'
+            ? 'bg-[radial-gradient(60%_60%_at_50%_40%,rgb(var(--accent)/0.09),transparent_70%)]'
             : 'bg-[radial-gradient(60%_60%_at_50%_40%,rgba(224,164,88,0.09),transparent_70%)]',
         )}
       />

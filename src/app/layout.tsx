@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter, Instrument_Serif, JetBrains_Mono } from 'next/font/google';
 
 import { AppProviders } from '@/components/providers/app-providers';
+import { THEME_SCRIPT } from '@/components/providers/theme-provider';
 import { profile } from '@/data/profile';
 
 import './globals.css';
@@ -61,8 +62,13 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#08090B',
-  colorScheme: 'dark',
+  // Two entries so the browser chrome matches before scripting decides; the
+  // theme provider rewrites the tag afterwards to follow the actual choice.
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#F6F7F9' },
+    { media: '(prefers-color-scheme: dark)', color: '#08090B' },
+  ],
+  colorScheme: 'light dark',
   width: 'device-width',
   initialScale: 1,
 };
@@ -71,9 +77,29 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${sans.variable} ${display.variable} ${mono.variable} dark`}
+      className={`${sans.variable} ${display.variable} ${mono.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        {/*
+          Applies the stored (or system) theme before the first paint. A
+          blocking inline script is the only thing that runs early enough —
+          anything bundled would arrive after the page has already painted the
+          wrong colours. suppressHydrationWarning above covers the class this
+          adds to <html>.
+        */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+
+        {/*
+          Framer Motion renders each element's `initial` state into the HTML, so
+          roughly a hundred nodes ship with inline opacity:0. That is correct
+          while scripting works — and leaves a blank page when it does not.
+          This reveals them for anyone browsing without JavaScript.
+        */}
+        <noscript>
+          <style>{`[style*="opacity:0"]{opacity:1!important;transform:none!important}`}</style>
+        </noscript>
+      </head>
       <body className="min-h-dvh bg-ink-950 font-sans text-chalk">
         <a
           href="#main"

@@ -1,7 +1,7 @@
 'use client';
 
-import { motion, type Variants } from 'framer-motion';
-import type { ElementType, ReactNode } from 'react';
+import { motion, type Target, type Transition, type Variants } from 'framer-motion';
+import { useMemo, type ElementType, type ReactNode } from 'react';
 
 import { fadeUp, stagger, viewportOnce } from '@/animations/motion';
 import { cn } from '@/lib/utils';
@@ -19,6 +19,23 @@ function motionTag(as: ElementType): ElementType {
   const created = motion.create(as as never) as ElementType;
   motionTagCache.set(as, created);
   return created;
+}
+
+/**
+ * Applies `delay` by rewriting the variant rather than passing a `transition`
+ * prop. A variant that defines its own transition — as every variant in
+ * animations/motion.ts does — takes precedence over the component's, so the
+ * prop form was silently doing nothing.
+ */
+function useDelayedVariants(variants: Variants, delay: number): Variants {
+  return useMemo(() => {
+    const visible = variants.visible;
+    // A variant can be a function of `custom`; leave those to their author.
+    if (!delay || !visible || typeof visible === 'function') return variants;
+
+    const { transition, ...target } = visible as Target & { transition?: Transition };
+    return { ...variants, visible: { ...target, transition: { ...transition, delay } } };
+  }, [variants, delay]);
 }
 
 type RevealProps = {
@@ -45,6 +62,7 @@ export function Reveal({
   repeat = false,
 }: RevealProps) {
   const MotionTag = motionTag(as) as typeof motion.div;
+  const delayed = useDelayedVariants(variants, delay);
 
   return (
     <MotionTag
@@ -52,8 +70,7 @@ export function Reveal({
       initial="hidden"
       whileInView="visible"
       viewport={repeat ? { margin: '0px 0px -12% 0px' } : viewportOnce}
-      variants={variants}
-      transition={delay ? { delay } : undefined}
+      variants={delayed}
     >
       {children}
     </MotionTag>

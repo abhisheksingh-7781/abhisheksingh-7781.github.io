@@ -30,7 +30,7 @@ export function Education() {
           >
             <span
               aria-hidden
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_20%_0%,rgba(53,199,154,0.08),transparent)]"
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_20%_0%,rgb(var(--accent)/0.08),transparent)]"
             />
             <p className="eyebrow">Graduation</p>
             <p className="mt-4 font-mono text-4xl tracking-tight text-chalk sm:text-5xl">

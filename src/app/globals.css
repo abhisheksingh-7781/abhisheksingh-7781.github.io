@@ -3,11 +3,95 @@
 @tailwind utilities;
 
 @layer base {
+  /**
+   * THEME TOKENS
+   * -------------------------------------------------------------------------
+   * Every colour in the design system lives here as an "R G B" triplet, which
+   * tailwind.config.ts wraps in `rgb(... / <alpha-value>)`. Components never
+   * name a colour directly — they say `bg-ink-850` or `text-chalk-muted`, and
+   * the meaning of that follows the active theme.
+   *
+   * The scale is semantic, not literal. `ink-950` is always "page", `ink-850`
+   * always "card", `chalk` always "primary text" — the numbers do not promise
+   * dark or light, only depth order.
+   *
+   * :root is the light theme; .dark overrides it. That direction (rather than
+   * the reverse) matches `prefers-color-scheme` defaults if scripting fails.
+   */
   :root {
-    --bg: #08090b;
-    --accent-rgb: 53 199 154;
-    --data-rgb: 224 164 88;
+    color-scheme: light;
+
+    --ink-950: 246 247 249; /* page */
+    --ink-900: 251 251 252; /* raised */
+    --ink-850: 255 255 255; /* card */
+    --ink-800: 241 243 246; /* elevated / hover */
+    --ink-700: 228 231 236;
+    --ink-600: 212 217 224;
+
+    --chalk: 14 17 22; /* primary text   — 18.0:1 on page */
+    --chalk-muted: 69 76 89; /* secondary text —  7.7:1 on page */
+    --chalk-faint: 97 104 117; /* meta text      —  5.0:1 on page */
+
+    /* Jade has to darken in light mode; #35C79A on white is ~1.9:1. */
+    --accent: 11 122 92; /* 4.9:1 — buttons, links */
+    --accent-soft: 10 107 80; /* 6.0:1 — accent as text, button hover */
+    --accent-deep: 7 90 67;
+
+    --data: 184 122 22;
+    --data-soft: 138 90 18; /* 5.4:1 — error text */
+    --data-deep: 110 71 14;
+
+    /* Hairlines darken the surface below them in light, lighten it in dark. */
+    --line: 15 23 42;
+    --line-alpha: 0.1;
+    --line-strong-alpha: 0.18;
+
+    --shadow-strength: 0.1;
+
     --nav-h: 4.5rem;
+  }
+
+  .dark {
+    color-scheme: dark;
+
+    --ink-950: 8 9 11;
+    --ink-900: 11 13 16;
+    --ink-850: 15 17 22;
+    --ink-800: 20 23 29;
+    --ink-700: 28 32 39;
+    --ink-600: 39 44 53;
+
+    --chalk: 244 245 247;
+    --chalk-muted: 154 161 172;
+    /* Lifted from #666D78, which measured 3.8:1 here — under AA for the 11px
+       monospace eyebrows this is used on. 4.6:1 without looking less faint. */
+    --chalk-faint: 115 122 134;
+
+    --accent: 53 199 154;
+    --accent-soft: 95 216 180;
+    --accent-deep: 30 143 110;
+
+    --data: 224 164 88;
+    --data-soft: 237 190 132;
+    --data-deep: 169 116 47;
+
+    --line: 255 255 255;
+    --line-alpha: 0.07;
+    --line-strong-alpha: 0.14;
+
+    --shadow-strength: 0.6;
+  }
+
+  /**
+   * Theme changes must be instantaneous. Many components carry colour
+   * transitions for hover, and without this the whole page would cross-fade
+   * for half a second on every toggle. The attribute is set just before the
+   * class flips and removed on the next frame.
+   */
+  [data-theme-switching] *,
+  [data-theme-switching] *::before,
+  [data-theme-switching] *::after {
+    transition: none !important;
   }
 
   * {
@@ -44,8 +128,8 @@
   }
 
   ::selection {
-    background: rgb(var(--accent-rgb) / 0.25);
-    color: #fff;
+    background: rgb(var(--accent) / 0.22);
+    color: rgb(var(--chalk));
   }
 
   :focus-visible {
@@ -70,15 +154,15 @@
     height: 10px;
   }
   ::-webkit-scrollbar-track {
-    background: #08090b;
+    background: rgb(var(--ink-950));
   }
   ::-webkit-scrollbar-thumb {
-    background: #23272f;
+    background: rgb(var(--ink-600));
     border-radius: 999px;
-    border: 3px solid #08090b;
+    border: 3px solid rgb(var(--ink-950));
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #333944;
+    background: rgb(var(--chalk-faint) / 0.7);
   }
 }
 
@@ -120,15 +204,16 @@
   }
 
   /* --- Decoration ------------------------------------------------------ */
+  /* Uses --line so the grid etches into a light page and glows on a dark one. */
   .grid-bg {
     background-image:
-      linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      linear-gradient(to right, rgb(var(--line) / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(var(--line) / 0.05) 1px, transparent 1px);
     background-size: 64px 64px;
   }
 
   .dot-bg {
-    background-image: radial-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px);
+    background-image: radial-gradient(rgb(var(--line) / 0.11) 1px, transparent 1px);
     background-size: 22px 22px;
   }
 
@@ -148,7 +233,7 @@
     background: linear-gradient(
       90deg,
       transparent,
-      rgb(var(--accent-rgb) / 0.55),
+      rgb(var(--accent) / 0.55),
       transparent
     );
   }

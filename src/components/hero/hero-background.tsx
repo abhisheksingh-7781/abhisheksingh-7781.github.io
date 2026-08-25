@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 
+import { useTheme } from '@/components/providers/theme-provider';
 import { usePrefersReducedMotion } from '@/lib/hooks';
 import { seededRandom } from '@/lib/utils';
 
@@ -20,6 +21,7 @@ type Node = { x: number; y: number; vx: number; vy: number; r: number };
 export function HeroBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const reduced = usePrefersReducedMotion();
+  const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -36,7 +38,14 @@ export function HeroBackground() {
     let t = 0;
 
     const LINK_DISTANCE = 132;
-    const ACCENT = '53,199,154';
+    // Read from the stylesheet rather than hardcoded, so the field re-tints
+    // with the theme. Canvas takes colour strings, not classes.
+    const styles = getComputedStyle(document.documentElement);
+    const token = (name: string, fallback: string) =>
+      styles.getPropertyValue(name).trim() || fallback;
+
+    const ACCENT = token('--accent', '53 199 154');
+    const LINE = token('--line', '255 255 255');
 
     const build = () => {
       const rect = canvas.getBoundingClientRect();
@@ -74,7 +83,7 @@ export function HeroBackground() {
         if (x === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       }
-      ctx.strokeStyle = `rgba(${ACCENT},0.13)`;
+      ctx.strokeStyle = `rgb(${ACCENT} / 0.13)`;
       ctx.lineWidth = 1;
       ctx.stroke();
 
@@ -83,8 +92,8 @@ export function HeroBackground() {
       ctx.lineTo(0, height);
       ctx.closePath();
       const gradient = ctx.createLinearGradient(0, baseline - amplitude, 0, height);
-      gradient.addColorStop(0, `rgba(${ACCENT},0.055)`);
-      gradient.addColorStop(1, 'rgba(53,199,154,0)');
+      gradient.addColorStop(0, `rgb(${ACCENT} / 0.055)`);
+      gradient.addColorStop(1, `rgb(${ACCENT} / 0)`);
       ctx.fillStyle = gradient;
       ctx.fill();
     };
@@ -115,7 +124,7 @@ export function HeroBackground() {
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
           ctx.lineTo(b.x, b.y);
-          ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+          ctx.strokeStyle = `rgb(${LINE} / ${alpha})`;
           ctx.lineWidth = 0.6;
           ctx.stroke();
         }
@@ -124,7 +133,7 @@ export function HeroBackground() {
       for (const node of nodes) {
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${ACCENT},0.42)`;
+        ctx.fillStyle = `rgb(${ACCENT} / 0.42)`;
         ctx.fill();
       }
     };
@@ -178,7 +187,9 @@ export function HeroBackground() {
       window.removeEventListener('resize', onResize);
       window.clearTimeout(resizeTimer);
     };
-  }, [reduced]);
+    // resolvedTheme is a dependency because the colours above are sampled once
+    // during setup; without it the field would keep the previous theme's tint.
+  }, [reduced, resolvedTheme]);
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -187,7 +198,7 @@ export function HeroBackground() {
       {/* Node + curve field */}
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
       {/* Accent bloom */}
-      <div className="absolute left-1/2 top-[-18%] h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(53,199,154,0.10),transparent)] blur-[2px]" />
+      <div className="absolute left-1/2 top-[-18%] h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(var(--accent)/0.10),transparent)] blur-[2px]" />
       <div className="absolute bottom-[-30%] right-[-10%] h-[420px] w-[520px] rounded-full bg-[radial-gradient(closest-side,rgba(224,164,88,0.055),transparent)]" />
       {/* Bottom fade into the page */}
       <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-ink-950" />

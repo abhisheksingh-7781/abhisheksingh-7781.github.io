@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 
 import { fadeUp, stagger, viewportOnce } from '@/animations/motion';
 import { DEMO_LABEL, donutSeries, kpis, tableRows } from '@/data/analytics';
+import { alpha, solid, useThemeTokens } from '@/lib/theme-tokens';
 import { cn } from '@/lib/utils';
 
 /**
@@ -73,6 +74,16 @@ function LegendDot({ color, label }: { color: string; label: string }) {
 }
 
 export function Dashboard() {
+  const tokens = useThemeTokens();
+  // Mirrors the donut's own slice palette in charts.tsx, so the legend and the
+  // chart cannot drift apart when the theme changes.
+  const donutPalette = [
+    solid(tokens.accent),
+    solid(tokens.data),
+    alpha(tokens.accent, 0.42),
+    alpha(tokens.line, 0.22),
+  ];
+
   return (
     <motion.div
       initial="hidden"
@@ -136,8 +147,8 @@ export function Dashboard() {
           className="lg:col-span-2"
           legend={
             <div className="flex flex-col items-end gap-1.5">
-              <LegendDot color="#35C79A" label="Queries" />
-              <LegendDot color="#E0A458" label="Dashboards" />
+              <LegendDot color={solid(tokens.accent)} label="Queries" />
+              <LegendDot color={solid(tokens.data)} label="Dashboards" />
             </div>
           }
         >
@@ -154,9 +165,7 @@ export function Dashboard() {
             {donutSeries.map((slice, i) => (
               <li key={slice.name} className="flex items-center justify-between text-xs">
                 <LegendDot
-                  color={
-                    ['#35C79A', '#E0A458', 'rgba(53,199,154,0.42)', 'rgba(255,255,255,0.18)'][i % 4]
-                  }
+                  color={donutPalette[i % donutPalette.length]}
                   label={slice.name}
                 />
                 <span className="font-mono text-chalk-muted">{slice.value}%</span>

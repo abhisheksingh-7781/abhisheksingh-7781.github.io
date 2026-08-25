@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 
 import { EASE } from '@/animations/motion';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { navItems } from '@/data/navigation';
 import { profile } from '@/data/profile';
 import { useActiveSection, useScrolled } from '@/lib/hooks';
@@ -94,6 +95,8 @@ export function Navbar() {
               </nav>
 
               <div className="flex items-center gap-2">
+                <ThemeToggle />
+
                 <Button
                   size="sm"
                   magnetic

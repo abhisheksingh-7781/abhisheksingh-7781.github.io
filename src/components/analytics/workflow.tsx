@@ -99,7 +99,7 @@ export function Workflow() {
                     active
                       ? isLast
                         ? 'border-data/40 bg-data/[0.1] text-data shadow-[0_0_0_4px_rgba(224,164,88,0.06)]'
-                        : 'border-accent/40 bg-accent/[0.1] text-accent shadow-[0_0_0_4px_rgba(53,199,154,0.06)]'
+                        : 'border-accent/40 bg-accent/[0.1] text-accent shadow-[0_0_0_4px_rgb(var(--accent)/0.06)]'
                       : 'border-line bg-ink-900 text-chalk-faint',
                   )}
                 >

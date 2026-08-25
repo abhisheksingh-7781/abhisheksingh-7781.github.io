@@ -53,7 +53,7 @@ export function ProjectCard({
           'pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500',
           'group-hover:opacity-100 group-focus-within:opacity-100',
           tone === 'build'
-            ? 'bg-[radial-gradient(70%_50%_at_50%_0%,rgba(53,199,154,0.07),transparent)]'
+            ? 'bg-[radial-gradient(70%_50%_at_50%_0%,rgb(var(--accent)/0.07),transparent)]'
             : 'bg-[radial-gradient(70%_50%_at_50%_0%,rgba(224,164,88,0.07),transparent)]',
         )}
       />

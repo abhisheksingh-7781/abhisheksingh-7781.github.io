@@ -9,6 +9,43 @@ import type { Config } from 'tailwindcss';
  *           Mono (eyebrows, tags, numerals).
  * Spacing : 4px base, section rhythm expressed through the `section-*` scale.
  */
+/**
+ * Builds a Tailwind colour from a CSS variable holding an "R G B" triplet.
+ *
+ * With no alpha modifier the colour falls back to `defaultAlphaVar` when one is
+ * given (hairlines), or full opacity when it is not. With a modifier
+ * (`bg-ink-800/60`) Tailwind's value wins.
+ */
+const themed = (rgbVar: string, defaultAlphaVar?: string): string => {
+  const resolve = ({ opacityValue }: { opacityValue?: string | number } = {}) => {
+    /**
+     * Tailwind calls this twice per colour. For the base utility it passes its
+     * own `var(--tw-*-opacity)` placeholder — which it then pins to 1 — and for
+     * a modifier (`border-line/70`) it passes the literal number.
+     *
+     * Treating the placeholder as "no modifier given" is what lets a hairline
+     * keep its resting alpha. Without this check `border-line` renders at full
+     * opacity, turning every hairline into a solid rule.
+     */
+    // Tailwind passes a number for some modifiers and a string for others.
+    const given = opacityValue === undefined ? undefined : String(opacityValue);
+    const explicit = given !== undefined && !given.startsWith('var(');
+
+    if (!explicit) {
+      return defaultAlphaVar
+        ? `rgb(var(${rgbVar}) / var(${defaultAlphaVar}))`
+        : `rgb(var(${rgbVar}))`;
+    }
+
+    return `rgb(var(${rgbVar}) / ${given})`;
+  };
+
+  // Tailwind accepts a resolver function here, but its published types narrow
+  // the field to `string`. The cast keeps the config type-checkable without
+  // widening the whole theme object to `any`.
+  return resolve as unknown as string;
+};
+
 const config: Config = {
   darkMode: 'class',
   content: ['./src/**/*.{ts,tsx,mdx}'],
@@ -20,34 +57,51 @@ const config: Config = {
     },
     extend: {
       colors: {
+        /**
+         * Every colour resolves through a CSS variable, so the same class
+         * (`bg-ink-950`, `text-chalk-muted`) means "page background" or
+         * "secondary text" in either theme. Swapping the variables in
+         * globals.css re-themes the entire site without touching a component.
+         *
+         * Values are space-separated RGB triplets rather than hex, because
+         * `rgb(... / <alpha-value>)` is what lets Tailwind's alpha modifiers
+         * (`bg-ink-800/60`) keep working.
+         */
         ink: {
-          950: '#08090B', // page background
-          900: '#0B0D10', // raised background
-          850: '#0F1116', // card background
-          800: '#14171D', // elevated card / hover
-          700: '#1C2027',
-          600: '#272C35',
+          950: themed('--ink-950'),
+          900: themed('--ink-900'),
+          850: themed('--ink-850'),
+          800: themed('--ink-800'),
+          700: themed('--ink-700'),
+          600: themed('--ink-600'),
         },
         chalk: {
-          DEFAULT: '#F4F5F7', // primary text
-          muted: '#9AA1AC', // secondary text
-          faint: '#666D78', // tertiary / meta text
+          DEFAULT: themed('--chalk'),
+          muted: themed('--chalk-muted'),
+          faint: themed('--chalk-faint'),
         },
         accent: {
-          DEFAULT: '#35C79A', // "build" — primary accent
-          soft: '#5FD8B4',
-          deep: '#1E8F6E',
+          DEFAULT: themed('--accent'),
+          soft: themed('--accent-soft'),
+          deep: themed('--accent-deep'),
         },
         data: {
-          DEFAULT: '#E0A458', // "analyze" — secondary accent, charts only
-          soft: '#EDBE84',
-          deep: '#A9742F',
+          DEFAULT: themed('--data'),
+          soft: themed('--data-soft'),
+          deep: themed('--data-deep'),
         },
+        /**
+         * Hairlines are translucent so they read correctly over any surface
+         * beneath them. Their resting alpha is itself a variable, because a
+         * light theme needs a heavier one than a dark theme to look equally
+         * faint.
+         */
         line: {
-          DEFAULT: 'rgba(255,255,255,0.07)',
-          strong: 'rgba(255,255,255,0.14)',
+          DEFAULT: themed('--line', '--line-alpha'),
+          strong: themed('--line', '--line-strong-alpha'),
         },
       },
+
       fontFamily: {
         sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         display: ['var(--font-display)', 'Georgia', 'serif'],

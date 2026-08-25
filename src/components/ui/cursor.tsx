@@ -4,6 +4,7 @@ import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
 import { useHasFinePointer, usePrefersReducedMotion } from '@/lib/hooks';
+import { alpha, useThemeTokens } from '@/lib/theme-tokens';
 
 /**
  * Desktop-only cursor companion: a precise dot plus a lagging ring that grows
@@ -19,6 +20,10 @@ export function Cursor() {
   const y = useMotionValue(-100);
   const ringX = useSpring(x, { stiffness: 260, damping: 28, mass: 0.6 });
   const ringY = useSpring(y, { stiffness: 260, damping: 28, mass: 0.6 });
+
+  // Framer Motion interpolates between colour values, so it needs resolved
+  // ones — a var() reference would animate from nothing to nothing.
+  const tokens = useThemeTokens();
 
   const [hovering, setHovering] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -62,7 +67,7 @@ export function Cursor() {
           width: hovering ? 44 : 26,
           height: hovering ? 44 : 26,
           opacity: visible ? (hovering ? 1 : 0.45) : 0,
-          backgroundColor: hovering ? 'rgba(53,199,154,0.10)' : 'rgba(53,199,154,0)',
+          backgroundColor: alpha(tokens.accent, hovering ? 0.1 : 0),
         }}
         transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
       />
