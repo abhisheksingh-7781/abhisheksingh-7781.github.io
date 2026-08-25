@@ -149,8 +149,9 @@ server/                   Express + TypeScript API (see server/README.md)
 │   ├── validation/       contact.ts — mirrors the client-side rules
 │   ├── models/           message.ts (Mongoose)
 │   ├── app.ts            Express assembly (CORS, helmet, JSON, routing)
-│   └── index.ts          bootstrap + graceful shutdown
-└── Dockerfile · render.yaml
+│   └── index.ts          bootstrap + graceful shutdown (long-running hosts)
+├── api/index.ts          Vercel serverless entry (per-request handler)
+└── Dockerfile · render.yaml · vercel.json
 ```
 
 The API is a **separate service** because the site is a static export: GitHub
@@ -210,9 +211,10 @@ Pages via [.github/workflows/deploy.yml](.github/workflows/deploy.yml). Before
 shipping, set `metadataBase` in `src/app/layout.tsx` to the real domain so
 social cards resolve.
 
-**API.** Deploy `server/` anywhere that runs Node — a
-[render.yaml](server/render.yaml) blueprint and a
-[Dockerfile](server/Dockerfile) are included. Two things must line up
+**API.** Deploy `server/` anywhere that runs Node. Vercel
+([vercel.json](server/vercel.json), root directory `server`), Render
+([render.yaml](server/render.yaml)) and Docker
+([Dockerfile](server/Dockerfile)) are all set up. Two things must line up
 afterwards:
 
 1. Add the site's origin to the API's `CORS_ORIGINS`, or the form gets a 403.

@@ -66,7 +66,16 @@ const schema = z.object({
   ADMIN_API_KEY: z.string().min(24, 'ADMIN_API_KEY must be at least 24 characters.').optional(),
 });
 
-const parsed = schema.safeParse(process.env);
+/**
+ * A commented-out setting and one left blank mean the same thing to a reader,
+ * so they must mean the same thing here. Without this, `SMTP_USER=` fails as
+ * "String must contain at least 1 character(s)" instead of simply being absent.
+ */
+const withoutBlanks = Object.fromEntries(
+  Object.entries(process.env).filter(([, value]) => value?.trim() !== ''),
+);
+
+const parsed = schema.safeParse(withoutBlanks);
 
 if (!parsed.success) {
   const details = parsed.error.issues

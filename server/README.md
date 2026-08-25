@@ -105,9 +105,36 @@ flooding the form, without retaining identifying data about ordinary visitors.
 
 ## Deploying
 
+Two shapes are supported, and the same `src/` serves both.
+
+### Vercel (serverless)
+
+[api/index.ts](api/index.ts) is the entry: Vercel calls a handler per request
+rather than running `src/index.ts`, so there is no `app.listen()`. The Express
+app is built once at module scope and reused by warm invocations, and
+[vercel.json](vercel.json) rewrites every path to it.
+
+Set the **Root Directory** to `server` in the project settings, then add the
+environment variables from [.env.example](.env.example) in the dashboard.
+`TRUST_PROXY` must be `1`.
+
+Two things behave differently here than on a long-running host:
+
+- **Rate limiting is best-effort.** The limiter counts in memory, and each
+  serverless instance has its own. Under concurrency the effective limit is
+  higher than `CONTACT_RATE_LIMIT_MAX`. Validation, the honeypot and the body
+  cap are unaffected. A shared store (Redis or MongoDB) fixes it if the form
+  ever attracts real abuse.
+- **MongoDB connects lazily**, on the first request of a cold instance, and the
+  attempt is memoised so concurrent requests share one connection instead of
+  each opening their own.
+
+### Render / Docker (long-running)
+
 A [render.yaml](render.yaml) blueprint and a [Dockerfile](Dockerfile) are
 included. On Render, choose **New > Blueprint** and point it at this repo, then
-fill the secrets marked `sync: false` in the dashboard.
+fill the secrets marked `sync: false` in the dashboard. Here `src/index.ts` is
+the entry, the database connects at boot, and rate limiting is exact.
 
 Wherever it lands, two things must line up:
 
