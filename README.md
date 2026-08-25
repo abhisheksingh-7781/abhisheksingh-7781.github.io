@@ -87,15 +87,27 @@ states and the case-study modal all read from that object.
 
 ### Connecting the contact form
 
-The form validates fully on the client but never pretends to send. Set:
+The form posts to the API in [`server/`](server/README.md). Point the site at
+it by setting one variable:
 
-```ts
-// src/data/profile.ts
-contact: { formEndpoint: '/api/contact' }   // or a Formspree/Resend URL
+```bash
+cp .env.local.example .env.local   # NEXT_PUBLIC_API_URL=http://localhost:4000
+npm --prefix server install
+npm --prefix server run dev        # API on :4000
+npm run dev                        # site on :3000
 ```
 
-It then POSTs `{ name, email, message }` as JSON. Until it is set, submitting
-shows an honest "no backend connected" panel with a mailto fallback.
+The form's badge turns from "Backend not connected" to "Connected", and
+submissions go to `<NEXT_PUBLIC_API_URL>/api/contact`.
+
+Because the site is a **static export**, that URL is inlined at build time, so
+changing it means rebuilding. For the deployed site, set `NEXT_PUBLIC_API_URL`
+as a repository variable (Settings > Secrets and variables > Actions >
+Variables); the Pages workflow passes it through.
+
+With the variable unset the form keeps its old behaviour: it validates fully,
+never pretends to send, and shows an honest "no backend connected" panel with a
+mailto fallback.
 
 ### Adding a profile photo
 
@@ -127,7 +139,23 @@ src/
 ├── data/                 all editable content (see above)
 ├── animations/           motion.ts (variants) · gsap.ts (scoped scenes)
 └── lib/                  hooks.ts · utils.ts · types.d.ts
+
+server/                   Express + TypeScript API (see server/README.md)
+├── src/
+│   ├── config/           env.ts — every setting, validated once at boot
+│   ├── routes/           health.ts · contact.ts
+│   ├── services/         database · mailer · contact-service
+│   ├── middleware/       rate-limit · admin-auth · error-handler
+│   ├── validation/       contact.ts — mirrors the client-side rules
+│   ├── models/           message.ts (Mongoose)
+│   ├── app.ts            Express assembly (CORS, helmet, JSON, routing)
+│   └── index.ts          bootstrap + graceful shutdown
+└── Dockerfile · render.yaml
 ```
+
+The API is a **separate service** because the site is a static export: GitHub
+Pages serves files and runs no server code, so Next.js API routes cannot run
+there. Keeping it separate leaves the existing Pages deployment untouched.
 
 ## Design system
 
@@ -172,9 +200,23 @@ Defined once in `tailwind.config.ts` and `src/app/globals.css`.
 - Dashboard figures are sample data and are labelled **Demo data** in the UI
 - No skill percentages — skills are shown as clusters, not fabricated scores
 - No placeholder URL is ever rendered as a working link
+- The contact form never reports success for a message that was not delivered
+  or stored — the API returns 503 rather than silently dropping it
 
 ## Deploying
 
-Any Node host works; Vercel needs no configuration. Before shipping, set
-`metadataBase` in `src/app/layout.tsx` to the real domain so social cards
-resolve.
+**Site.** Pushing to `main` builds the static export and publishes it to GitHub
+Pages via [.github/workflows/deploy.yml](.github/workflows/deploy.yml). Before
+shipping, set `metadataBase` in `src/app/layout.tsx` to the real domain so
+social cards resolve.
+
+**API.** Deploy `server/` anywhere that runs Node — a
+[render.yaml](server/render.yaml) blueprint and a
+[Dockerfile](server/Dockerfile) are included. Two things must line up
+afterwards:
+
+1. Add the site's origin to the API's `CORS_ORIGINS`, or the form gets a 403.
+2. Set the `NEXT_PUBLIC_API_URL` repository variable to the API's base URL and
+   re-run the Pages workflow, so the endpoint is inlined into the build.
+
+Full configuration reference: [server/README.md](server/README.md).

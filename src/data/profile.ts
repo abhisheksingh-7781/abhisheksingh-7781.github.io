@@ -84,10 +84,18 @@ export const profile = {
     supporting:
       "Whether it's a web application, data problem, or something completely new, let's talk.",
     /**
-     * Endpoint for the contact form. Leave empty and the form stays in
-     * "not connected" mode: it validates, but never pretends to send.
+     * Endpoint for the contact form, supplied by the API in ./server.
+     *
+     * Set NEXT_PUBLIC_API_URL (e.g. https://portfolio-api.onrender.com) and the
+     * form submits for real. Because the site is a static export, this is baked
+     * in at build time, so changing it means rebuilding.
+     *
+     * Left unset, the form stays in "not connected" mode: it validates, but
+     * never pretends to send.
      */
-    formEndpoint: '',
+    formEndpoint: process.env.NEXT_PUBLIC_API_URL
+      ? `${process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '')}/api/contact`
+      : '',
   },
 
   projects,

@@ -1,0 +1,38 @@
+# Render blueprint for the portfolio API.
+# Deploy: New > Blueprint, point at this repository.
+# Secrets (SMTP_PASSWORD, MONGODB_URI, ADMIN_API_KEY) are marked sync:false and
+# must be filled in the dashboard rather than committed here.
+services:
+  - type: web
+    name: portfolio-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Render terminates TLS at its proxy, so Express needs one trusted hop
+      # for req.ip — and therefore rate limiting — to be correct.
+      - key: TRUST_PROXY
+        value: 1
+      - key: CORS_ORIGINS
+        value: https://abhisheksingh-7781.github.io
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: CONTACT_TO_EMAIL
+        sync: false
+      - key: CONTACT_FROM_EMAIL
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: ADMIN_API_KEY
+        sync: false

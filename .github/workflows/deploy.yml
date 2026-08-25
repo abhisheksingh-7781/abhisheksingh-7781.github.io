@@ -35,6 +35,14 @@ jobs:
 
       - name: Build static site
         run: npm run build
+        env:
+          # The contact form endpoint is inlined at build time because the site
+          # is a static export. Set this as a repository variable
+          # (Settings > Secrets and variables > Actions > Variables) to the
+          # deployed API's base URL, e.g. https://portfolio-api.onrender.com.
+          # Left unset, the form deploys in "not connected" mode rather than
+          # pointing at a URL that does not answer.
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

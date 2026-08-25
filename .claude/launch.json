@@ -21,6 +21,17 @@
         "out"
       ],
       "port": 3100
+    },
+    {
+      "name": "portfolio-api",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "server",
+        "run",
+        "dev"
+      ],
+      "port": 4000
     }
   ]
 }
