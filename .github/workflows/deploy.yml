@@ -33,16 +33,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # NEXT_PUBLIC_API_URL comes from .env.production, which is committed.
+      # It is deliberately not passed as a repository variable here: an unset
+      # variable resolves to an empty string, and an empty value set in the
+      # environment silently shadows the .env file rather than falling back to
+      # it — which would deploy the contact form in "not connected" mode.
       - name: Build static site
         run: npm run build
-        env:
-          # The contact form endpoint is inlined at build time because the site
-          # is a static export. Set this as a repository variable
-          # (Settings > Secrets and variables > Actions > Variables) to the
-          # deployed API's base URL, e.g. https://portfolio-api.onrender.com.
-          # Left unset, the form deploys in "not connected" mode rather than
-          # pointing at a URL that does not answer.
-          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
